@@ -173,4 +173,47 @@ A IA revisou o teste e confirmou as seguintes validações:
   - Nenhuma sugestão foi rejeitada, todas as melhorias sugeridas são boas práticas de engenharia de software em Go.
 - **Conclusão sobre a cobertura**: O teste mínimo atual valida corretamente a especificação, mas estendê-lo garantirá robustez contra regressões.
 
+---
+
+## Etapa 5 — Inclusão de novos casos de teste
+
+### Prompt Utilizado
+> Sugira mais três casos de teste para a função CountWords. Os testes devem cobrir situações diferentes, como texto vazio, texto contendo apenas palavras curtas e texto com palavras repetidas com diferentes combinações de maiúsculas, minúsculas e pontuação.
+
+### Casos de Teste Adicionados
+Implementamos três novos casos de teste dentro de uma estrutura de Table-Driven Tests em `wordcount_test.go`:
+1. **Texto Vazio (`Texto_Vazio`)**:
+   - Entrada: `""`
+   - Resultado esperado: Mapa vazio `map[string]int{}` (garante que entradas vazias não quebram a função nem geram palavras fantasmas).
+2. **Apenas Palavras Curtas (`Apenas_Palavras_Curtas`)**:
+   - Entrada: `"A é do da de no na ir go ia ok me te se"`
+   - Resultado esperado: Mapa vazio `map[string]int{}` (valida se o filtro de descarte de palavras com menos de 3 caracteres funciona de forma abrangente para vários termos curtos e conectivos).
+3. **Combinação de Casing e Pontuação (`Combinacao_Casing_e_Pontuacao`)**:
+   - Entrada: `"Gol! gol, GOL... gol? Gol."`
+   - Resultado esperado: `map[string]int{"gol": 5}` (valida a normalização completa e remoção de pontuações consecutivas/variadas integradas à mesma palavra sob diferentes casings).
+
+---
+
+## Etapa 6 — Revisão final
+
+### Prompt Utilizado
+> Analise o código completo da função CountWords e dos testes. Verifique se os testes são suficientes para validar a especificação e se há algum caso importante não coberto.
+> [Código Completo da Função e dos Testes]
+
+### Sugestões Finais da IA
+A IA revisou a solução final e concluiu que:
+1. **Suficiência**: Os quatro casos de teste agora presentes são suficientes para validar toda a especificação pedida: normalização de minúsculas, remoção de pontuações especificadas, descarte de palavras curtas menores que 3 runas, e contagem exata por comparação de mapas.
+2. **Limitações Identificadas**:
+   - O filtro de remoção de pontuação é explícito e estrito para pontuações simples (`,`, `.`, `!`, `?`, `;`, `:`). Outros caracteres como parênteses `()`, aspas `""` ou colchetes `[]` não são removidos por essa lógica manual.
+   - O uso de `strings.Fields` divide apenas por espaços em branco, o que é o comportamento correto padrão, mas palavras que contenham hífens (como "guarda-chuva") ou apóstrofos (como "d'água") não são divididas, permanecendo como palavras únicas, o que é adequado a menos que a definição de palavra exija separação por esses símbolos.
+3. **Melhoria Futura Recomendada**: Para produção, caso novas pontuações fossem detectadas, seria prudente migrar para uma filtragem baseada em expressões regulares ou verificação via `unicode.IsPunct` e `unicode.IsSymbol`.
+
+### Alterações Realizadas
+- Ajustado e simplificado o código para que o loop limpe precisamente as pontuações simples demandadas, mantendo a simplicidade e a eficiência em termos de alocação com `strings.Builder`.
+- Testado e validado que o compilador de Go e o executor de testes passam com 100% de sucesso.
+
+### Limitações Conhecidas
+- A pontuação simples é filtrada por uma lista estática. Caso o texto de entrada utilize pontuações não listadas (ex: aspas inglesas, colchetes), esses caracteres permanecerão na palavra.
+
+
 
