@@ -29,3 +29,52 @@ Os principais pontos destacados pela IA foram:
 - Usar `strings.Fields` para realizar a quebra de palavras por qualquer espaço em branco.
 - Tratar caracteres usando funções do pacote `unicode` para preservar letras com acentos (como `unicode.IsLetter` ou `unicode.IsSpace`), removendo pontuações e símbolos simples.
 - Para verificar o limite de tamanho menor que 3, usaremos `utf8.RuneCountInString` para garantir a contagem correta de runas/caracteres.
+
+---
+
+## Etapa 2 — Implementação da função
+
+### Prompt Utilizado
+> Implemente em Go a função CountWords(text string) map[string]int. A função deve converter palavras para minúsculas, remover pontuação simples, ignorar palavras com menos de 3 caracteres e retornar um map[string]int com a frequência das palavras.
+
+### Código Gerado
+```go
+package testeGO
+
+import (
+	"strings"
+	"unicode/utf8"
+)
+
+func CountWords(text string) map[string]int {
+	frequencies := make(map[string]int)
+	words := strings.Fields(text)
+
+	for _, word := range words {
+		lowerWord := strings.ToLower(word)
+
+		var cleanedBuilder strings.Builder
+		for _, r := range lowerWord {
+			if r == ',' || r == '.' || r == '!' || r == '?' || r == ';' || r == ':' {
+				continue
+			}
+			cleanedBuilder.WriteRune(r)
+		}
+		cleaned := cleanedBuilder.String()
+
+		if utf8.RuneCountInString(cleaned) >= 3 {
+			frequencies[cleaned]++
+		}
+	}
+
+	return frequencies
+}
+```
+
+### Verificações Realizadas
+- **O código compila?** Sim, compilou com sucesso após ajuste nas importações (removido `"unicode"` que não estava sendo usado).
+- **A função tem a assinatura esperada?** Sim, `func CountWords(text string) map[string]int`.
+- **A normalização está correta?** Sim, usamos `strings.ToLower` para converter todos os caracteres para minúsculas antes de contar.
+- **Palavras curtas são ignoradas?** Sim, palavras com comprimento (medido em runas) menor que 3 são descartadas.
+- **Acentos são preservados?** Sim, o mapeamento de pontuação foca apenas em `,`, `.`, `!`, `?`, `;`, `:`, mantendo as letras acentuadas intactas (por exemplo, "árvore", "útil"). E o comprimento é checado por runas, garantindo que acentos (que usam múltiplos bytes) sejam contados como 1 caractere único.
+
