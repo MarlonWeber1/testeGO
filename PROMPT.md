@@ -75,6 +75,102 @@ func CountWords(text string) map[string]int {
 - **O código compila?** Sim, compilou com sucesso após ajuste nas importações (removido `"unicode"` que não estava sendo usado).
 - **A função tem a assinatura esperada?** Sim, `func CountWords(text string) map[string]int`.
 - **A normalização está correta?** Sim, usamos `strings.ToLower` para converter todos os caracteres para minúsculas antes de contar.
-- **Palavras curtas são ignoradas?** Sim, palavras com comprimento (medido em runas) menor que 3 são descartadas.
 - **Acentos são preservados?** Sim, o mapeamento de pontuação foca apenas em `,`, `.`, `!`, `?`, `;`, `:`, mantendo as letras acentuadas intactas (por exemplo, "árvore", "útil"). E o comprimento é checado por runas, garantindo que acentos (que usam múltiplos bytes) sejam contados como 1 caractere único.
+
+---
+
+## Etapa 3 — Criação do teste automático
+
+### Prompt Utilizado
+> Crie um teste automático em Go, usando o pacote padrão testing, para validar a função CountWords. O teste deve usar a seguinte entrada:
+> 
+> Casa, casa! A casa é azul.
+> Árvore; árvore? verde.
+> Go go Go. IA é útil, mas IA erra.
+> 
+> O resultado esperado deve ser:
+> casa: 3
+> árvore: 2
+> azul: 1
+> verde: 1
+> útil: 1
+> mas: 1
+> erra: 1
+> 
+> O teste deve comparar o mapa produzido pela função com o mapa esperado e falhar caso haja qualquer diferença.
+> O teste deve ser executado com:
+> go test
+
+### Teste Gerado
+```go
+package testeGO
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestCountWords(t *testing.T) {
+	text := `Casa, casa! A casa é azul.
+Árvore; árvore? verde.
+Go go Go. IA é útil, mas IA erra.`
+
+	expected := map[string]int{
+		"casa":   3,
+		"árvore": 2,
+		"azul":   1,
+		"verde":  1,
+		"útil":   1,
+		"mas":    1,
+		"erra":   1,
+	}
+
+	result := CountWords(text)
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("CountWords() failed.\nExpected:\n%v\nGot:\n%v", expected, result)
+	}
+}
+```
+
+### Resultado da Execução
+O teste foi executado com o comando `go test -v` no terminal do Windows Powershell e passou sem problemas:
+```
+=== RUN   TestCountWords
+--- PASS: TestCountWords (0.00s)
+PASS
+ok  	testeGO	0.663s
+```
+
+### Erros Encontrados & Correções Realizadas
+- Nenhum erro foi encontrado durante a compilação ou execução do teste básico. O mapa produzido coincidiu perfeitamente com o esperado.
+
+---
+
+## Etapa 4 — Revisão crítica do teste
+
+### Prompt Utilizado
+> Revise o teste automático abaixo. Verifique se ele testa corretamente a conversão para minúsculas, a remoção de pontuação, o descarte de palavras com menos de 3 caracteres, a contagem de repetições e a comparação completa entre o mapa esperado e o mapa produzido.
+> [Código do Teste de wordcount_test.go]
+
+### Resumo da Resposta da IA
+A IA revisou o teste e confirmou as seguintes validações:
+1. **Conversão para minúsculas**: Testado com sucesso, pois "Casa", "casa" e "casa!" são consolidados no mesmo termo "casa".
+2. **Remoção de pontuação**: Testado com sucesso, pois termos como "casa!" perdem a pontuação e viram "casa", combinando-se com as demais ocorrências.
+3. **Descarte de palavras curtas**: Testado com sucesso. Palavras como "A", "é", "Go", "go", "IA" foram corretamente excluídas por possuírem menos de 3 caracteres. (Nota: "mas" possui 3 caracteres, logo foi incluída).
+4. **Contagem de repetições**: Correto. As palavras "casa" e "árvore" tiveram contagem 3 e 2 respectivamente.
+5. **Comparação de mapas**: O uso de `reflect.DeepEqual` é apropriado e rigoroso. Ele falhará se houver chaves extras, chaves ausentes ou valores discrepantes.
+
+**Sugestões da IA:**
+- Utilizar a técnica de **Table-Driven Tests** (Testes Baseados em Tabelas) para estruturar melhor o teste, permitindo testar múltiplos casos de forma limpa e isolada usando `t.Run`.
+- Adicionar casos de teste com strings vazias, apenas pontuações, caracteres especiais adicionais e espaços extras.
+
+### Decisões sobre as sugestões da IA
+- **Sugestões Aceitas**: 
+  - Estruturar os testes usando Table-Driven Tests.
+  - Adicionar casos de teste para tratar cenários extremos (ex: string vazia, apenas palavras curtas, combinações variadas de casing e pontuação).
+- **Sugestões Rejeitadas**:
+  - Nenhuma sugestão foi rejeitada, todas as melhorias sugeridas são boas práticas de engenharia de software em Go.
+- **Conclusão sobre a cobertura**: O teste mínimo atual valida corretamente a especificação, mas estendê-lo garantirá robustez contra regressões.
+
 
